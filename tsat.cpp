@@ -11,7 +11,7 @@
  **/
 
 #include "utils/utils.hpp"
-#include "heuristics/sa.h"
+#include "heuristics/sa.hpp"
 
 int main(const int argc, const char* argv[]) {
 
@@ -38,7 +38,7 @@ int main(const int argc, const char* argv[]) {
     while(is.peek() != '%'){
         is >> a >> b >> c;
         is.ignore(numeric_limits<streamsize>::max(), '\n');
-        clauses[idx++] = new Config(variables, a, b, c);
+        clauses[idx++] = new Config(variables, a, b, c, 0);
     }
     assert(idx == clauseAmt);
 
@@ -50,6 +50,8 @@ int main(const int argc, const char* argv[]) {
         count += c->evaluate();
     }
     cout << "True = " << count << endl << "False = " << idx - count << endl;
+
+    clauses[0]->Randomsearch();
 #endif
 
     return 0;

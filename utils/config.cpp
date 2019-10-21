@@ -1,7 +1,6 @@
 #include "utils.hpp"
 
-Config::Config(vector<byte>& var, int a, int b, int c) {
-
+Config::Config(vector<byte>& var, int a, int b, int c, int d) : Simanneal<int>(0, 0, 0, 0) {
     pair<byte*, byte> varA, varB, varC;
     varA = make_pair(&var[abs(a)-1], (int)(a<0));
     varB = make_pair(&var[abs(b)-1], (int)(b<0));
