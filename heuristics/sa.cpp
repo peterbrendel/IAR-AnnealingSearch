@@ -1,7 +1,7 @@
 #include "../utils/utils.hpp"
 #include "sa.hpp"
 
-template<typename T>
+template<class T>
 Simanneal<T>::Simanneal(int maxT, int minT, int iterations, int updates){
   this->maxT = maxT;
   this->minT = minT;
@@ -9,12 +9,16 @@ Simanneal<T>::Simanneal(int maxT, int minT, int iterations, int updates){
   this->updates = updates;
 }
 
-template<typename T>
+template<class T>
 void Simanneal<T>::Randomsearch(){
-  int iterations = this->itereations;
 
-  while(iterations--){
-    cout << this->evaluate() << endl;
+  int updates = this->updates;
+
+  while(updates--){
+    int iterations = this->iterations;
+    while(iterations--){
+
+    }
   }
 
 }

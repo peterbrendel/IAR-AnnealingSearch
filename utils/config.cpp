@@ -1,6 +1,7 @@
 #include "utils.hpp"
+#include "config.hpp"
 
-Config::Config(vector<byte>& var, int a, int b, int c, int d) : Simanneal<int>(0, 0, 0, 0) {
+Config::Config(vector<byte>& var, int a, int b, int c) {
     pair<byte*, byte> varA, varB, varC;
     varA = make_pair(&var[abs(a)-1], (int)(a<0));
     varB = make_pair(&var[abs(b)-1], (int)(b<0));
@@ -46,4 +47,8 @@ string Config::to_string() const {
     //cout << "(" << na << ida << ", " << nb << idb << ", " << nc << idc << ") = (" << ba << ", " << bb << ", " << bc << ")";
     return out.str();
 
+}
+
+ostream& operator<< (ostream& stream, const Config& obj){
+    return stream << obj.to_string();
 }

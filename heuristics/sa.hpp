@@ -1,25 +1,36 @@
-#pragma once
+#ifndef SA_HPP
+#define SA_HPP
 #include "../utils/utils.hpp"
+#include <typeinfo>
 
-template<typename T>
+template <class T>
 class Simanneal {
 private:
+    T   dataset;
     int maxT;
     int minT;
     int iterations;
     int updates;
 
-    virtual int evaluate() = 0;
-
-    T best_state;
-    T state;
-
 public:
-    void Randomsearch();
-    Simanneal(int maxT, int minT, int iterations, int updates);
+    explicit Simanneal(int maxT = 2, int minT = 1000, int iterations = 1000, int updates = 100);
+
+    void Randomsearch(){
+      int updates = this->updates;
+      while(updates--){
+        int iterations = this->iterations;
+        while(iterations--){
+        }
+      }
+    }
+
+    string getType() {
+      return typeid(dataset).name();
+    }
+
 };
 
-template<typename T>
+template <class T>
 Simanneal<T>::Simanneal(int maxT, int minT, int iterations, int updates){
   this->maxT = maxT;
   this->minT = minT;
@@ -27,12 +38,4 @@ Simanneal<T>::Simanneal(int maxT, int minT, int iterations, int updates){
   this->updates = updates;
 }
 
-template<typename T>
-void Simanneal<T>::Randomsearch(){
-  int iterations = this->iterations;
-
-  while(iterations--){
-    cout << this->evaluate() << endl;
-  }
-
-}
+#endif
