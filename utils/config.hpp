@@ -1,6 +1,7 @@
 #include "utils.hpp"
+#include "base.hpp"
 
-class Config {
+class Config : public Base {
 private:
     cnf clause;
     idarr indexArr;
