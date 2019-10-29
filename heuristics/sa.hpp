@@ -3,6 +3,8 @@
 #include "../utils/utils.hpp"
 #include "../utils/base.hpp"
 #include <typeinfo>
+#include <cstdio>
+#include <cmath>
 
 template <class T, class G>
 class Simanneal {
@@ -10,67 +12,118 @@ private:
     T * dataset;
     G * clauses;
 
-    int maxT;
-    int minT;
+    double firstT;
+    double iteraT;
     int iterations;
     int updates;
+    int maxSuccess;
+
+    double eval(){
+        int val = 0;
+        for(auto c : *this->clauses){
+            val += c->evaluate();
+        }
+        return ((double)val / this->clauses->size());
+    }
 
 public:
-    explicit Simanneal(int maxT = 2, int minT = 1000, int iterations = 1000, int updates = 100);
-    Simanneal(int maxT, int minT, int iterations, int updates, T * dataset, G * clauses);
-
-    void genRandVal(){}
+    explicit Simanneal(double firstT = 2, int iterations = 1000, int updates = 100);
+    Simanneal(double firstT, int iterations, int updates, int maxSuccess, T * dataset, G * clauses);
 
     pair<int, T> Randomsearch(void (*f)(T*)){
-      int updates = this->updates;
-      int maxK = 0;
-      T bestSet;
+        int updates = this->updates;
+        int maxK = 0;
+        T bestSet;
 
-      while(updates--){
-        int iterations = this->iterations;
-        while(iterations--){
-          int k = 0;
-          f(this->dataset);
-          for(auto c : *this->clauses){
-            k += c->evaluate();
-          }
-          //cout << "Update " << this->updates - updates << " Iteration " << this->iterations - iterations << ": " << k << endl;
-          if(k > maxK){
-            maxK = k;
-            bestSet = *this->dataset;
-          }
+        while(updates--){
+            int iterations = this->iterations;
+            while(iterations--){
+                int k = 0;
+                f(this->dataset);
+                for(auto c : *this->clauses){
+                    k += c->evaluate();
+                }
+                // cout << "Update " << this->updates - updates << " Iteration " << this->iterations - iterations << ": " << k << endl;
+                if(k > maxK){
+                    maxK = k;
+                    bestSet = *this->dataset;
+                }
+            }
         }
-      }
-      return {maxK, bestSet};
+        return {maxK, bestSet};
+    }
+
+    pair<int, T> Anneal(void (*f)(T*, double temp), void (*g)(double*, int update)){
+        this->  iteraT      = this->firstT;
+        int     iterations  = this->iterations;
+        int     updates     = this->updates;
+        int     maxK        = 0;
+        T       bestSet     = *this->dataset;
+        double  deltaBest   = this->eval();
+        int j=1;
+        int success;
+        do {
+            int i=1;
+            success = 0;
+            updates = this->updates;
+            do{
+                f(this->dataset, this->iteraT);
+                double deltaTest = this->eval();
+                double delta = deltaTest - deltaBest;
+                // cout << delta << endl;
+
+                double a = exp(-delta / this->iteraT);
+                double b = (double)rand() / RAND_MAX;
+                #ifdef DEBUG
+                cout << a << (a < b ? '<' : '>') << b << endl;
+                #endif
+                if(delta <= 0 || (a > b) ) {
+                    //cout << exp(((-delta/clauses->size()) / this->iteraT)) << endl;
+                    bestSet = *this->dataset;
+                    deltaBest = deltaTest;
+                    success++;
+                }else{
+                    cout << 'e';
+                }
+                i++;
+            } while(success < this->maxSuccess && i <= updates );
+
+            g(&this->iteraT, j);
+            j++;
+            cout << "\ntemperature> " << this->iteraT << endl;
+        }while(success != 0 && j <= iterations);
+
+        return {deltaBest, bestSet};
     }
 
     string getType() {
-      return typeid(dataset).name();
+        return typeid(dataset).name();
     }
 
 };
 
 template <class T, class G>
-Simanneal<T,G>::Simanneal(int maxT, int minT, int iterations, int updates){
-  this->maxT = maxT;
-  this->minT = minT;
-  this->iterations = iterations;
-  this->updates = updates;
-  this->dataset = new T();
+Simanneal<T,G>::Simanneal(double firstT, int iterations, int updates){
+    this->firstT = firstT;
+    this->iterations = iterations;
+    this->updates = updates;
+    this->dataset = new T();
 }
 
 template <class T, class G>
-Simanneal<T,G>::Simanneal(int maxT, int minT, int iterations, int updates, T * dataset, G * clauses){
-  this->maxT = maxT;
-  this->minT = minT;
-  this->iterations = iterations;
-  this->updates = updates;
-  this->dataset = dataset;
-  this->clauses = clauses;
-  cout << "dataset content> ";
-  for(int c : *(this->dataset)){
-    cout << c << " ";
-  } cout << endl;
+Simanneal<T,G>::Simanneal(double firstT, int iterations, int updates, int maxSuccess, T * dataset, G * clauses){
+    this->firstT = firstT;
+    this->iterations = iterations;
+    this->updates = updates;
+    this->maxSuccess = maxSuccess;
+    this->dataset = dataset;
+    this->clauses = clauses;
+    #ifdef DEBUG
+    cout << "dataset content> ";
+    for(int c : *(this->dataset)){
+        cout << c << " ";
+    } cout << endl;
+    #endif
 }
 
 #endif

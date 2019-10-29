@@ -39,8 +39,8 @@ string Config::to_string() const {
     bb  = (*b.first ^ b.second);
     bc  = (*c.first ^ c.second);
     int sum =   (*a.first ^ a.second) |
-                (*b.first ^ b.second) |
-                (*c.first ^ c.second) ;
+    (*b.first ^ b.second) |
+    (*c.first ^ c.second) ;
 
     ostringstream out;
     out << "(" << na << setw(2) << ida << ", " << nb << setw(2) << idb << ", " << nc << setw(2) << idc << ") = (" << ba << ", " << bb << ", " << bc << ") = " << sum;
