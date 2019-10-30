@@ -77,19 +77,17 @@ public:
             success = 0;
             updates = this->updates;
             do{
+                iterSet = *this->dataset;
                 f(this->dataset, this->iteraT);
                 int testEval = this->eval();
                 double deltaTest = (double)testEval / this->clauses->size();
-                double delta = deltaTest - deltaIter;
-                // cout << delta << endl;
+                double delta = deltaIter - deltaTest;
 
-                #ifdef DEBUG
-                cout << a << (a < b ? '<' : '>') << b << endl;
-                #endif
                 if(delta <= 0) {
                     success++;
+                    deltaIter = deltaTest;
                     history.push_back(testEval);
-                    if(testEval < bestEval){
+                    if(testEval > bestEval){
                         bestSet = *this->dataset;
                         deltaBest = deltaTest;
                         bestEval = testEval;
@@ -97,16 +95,12 @@ public:
                 } else {
                   double a = (double)rand() / RAND_MAX;
                   double b = exp(-delta / this->iteraT);
-                  if(a < b){
-                    
+                  if(a >= b){
+                      *this->dataset = iterSet;
+                  } else {
+                    deltaIter = deltaTest;
                   }
                 }
-                #ifdef DEBUG
-                else{
-
-                    cout << 'e';
-                }
-                #endif
                 i++;
             } while(success < this->maxSuccess && i <= updates );
 
@@ -117,6 +111,7 @@ public:
             #endif
         }while(success != 0 && j <= iterations);
         int trues = 0;
+        *this->dataset = bestSet;
         for(auto c : *this->clauses){
             trues += c->evaluate();
         }
