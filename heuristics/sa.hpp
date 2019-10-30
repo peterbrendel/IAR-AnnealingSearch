@@ -109,7 +109,7 @@ public:
             #ifdef DEBUG
             cout << "\ntemperature> " << this->iteraT << endl;
             #endif
-        }while(success != 0 && j <= iterations);
+        }while(/*success != 0 && j <= iterations*/this->iteraT > 0.01);
         int trues = 0;
         *this->dataset = bestSet;
         for(auto c : *this->clauses){

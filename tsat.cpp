@@ -16,7 +16,7 @@
 #include <cstdio>
 #include <cmath>
 
-const double T0 = 0.95, TN = 0.01;
+const double T0 = 1000, TN = 0.01;
 const int N = 1000;
 const int updt = 100;
 const int maxSucc = 1000;
