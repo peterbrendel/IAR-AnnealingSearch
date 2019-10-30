@@ -18,12 +18,12 @@ private:
     int updates;
     int maxSuccess;
 
-    double eval(){
+    int eval(){
         int val = 0;
         for(auto c : *this->clauses){
             val += c->evaluate();
         }
-        return ((double)val / this->clauses->size());
+        return val;
     }
 
 public:
@@ -53,13 +53,23 @@ public:
         return {maxK, bestSet};
     }
 
-    pair<int, T> Anneal(void (*f)(T*, double temp), void (*g)(double*, int update)){
+    pair<vector<int>, pair<int, T>> Anneal(void (*f)(T*, double temp), void (*g)(double*, int update)){
         this->  iteraT      = this->firstT;
         int     iterations  = this->iterations;
         int     updates     = this->updates;
         int     maxK        = 0;
+
         T       bestSet     = *this->dataset;
-        double  deltaBest   = this->eval();
+        int     bestEval    = this->eval();
+        double  deltaBest   = (double)bestEval / this->clauses->size();
+
+        T       iterSet     = *this->dataset;
+        int     iterEval    = bestEval;
+        double  deltaIter    = deltaBest;
+
+        vector<int> history;
+        history.push_back(bestEval);
+
         int j=1;
         int success;
         do {
@@ -68,32 +78,50 @@ public:
             updates = this->updates;
             do{
                 f(this->dataset, this->iteraT);
-                double deltaTest = this->eval();
-                double delta = deltaTest - deltaBest;
+                int testEval = this->eval();
+                double deltaTest = (double)testEval / this->clauses->size();
+                double delta = deltaTest - deltaIter;
                 // cout << delta << endl;
 
-                double a = exp(-delta / this->iteraT);
-                double b = (double)rand() / RAND_MAX;
                 #ifdef DEBUG
                 cout << a << (a < b ? '<' : '>') << b << endl;
                 #endif
-                if(delta <= 0 || (a > b) ) {
-                    //cout << exp(((-delta/clauses->size()) / this->iteraT)) << endl;
-                    bestSet = *this->dataset;
-                    deltaBest = deltaTest;
+                if(delta <= 0) {
                     success++;
-                }else{
+                    history.push_back(testEval);
+                    if(testEval < bestEval){
+                        bestSet = *this->dataset;
+                        deltaBest = deltaTest;
+                        bestEval = testEval;
+                    }
+                } else {
+                  double a = (double)rand() / RAND_MAX;
+                  double b = exp(-delta / this->iteraT);
+                  if(a < b){
+                    
+                  }
+                }
+                #ifdef DEBUG
+                else{
+
                     cout << 'e';
                 }
+                #endif
                 i++;
             } while(success < this->maxSuccess && i <= updates );
 
             g(&this->iteraT, j);
             j++;
+            #ifdef DEBUG
             cout << "\ntemperature> " << this->iteraT << endl;
+            #endif
         }while(success != 0 && j <= iterations);
+        int trues = 0;
+        for(auto c : *this->clauses){
+            trues += c->evaluate();
+        }
 
-        return {deltaBest, bestSet};
+        return {history, {trues, bestSet}};
     }
 
     string getType() {

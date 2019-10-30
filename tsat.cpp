@@ -19,13 +19,12 @@
 void sorter(vector<byte> * arr, double temp){
     int arrsz = arr->size();
     for(int i=0; i < arrsz; i++){
-        (*arr)[i] ^= ((double)rand() / RAND_MAX < temp ? 1 : 0);
+        (*arr)[i] ^= ((double)rand() / RAND_MAX < temp);
     }
 }
 
 void alphatemp(double * temp, int iter){
-    // cout << 1.0 / (1 + 2 * log(1+iter)) << endl;
-    *temp = 1.0 / (1 + 1.47 * log(1+iter));
+    *temp = 1.0 / (1 + 1.78 * log(1+iter));
 }
 
 int main(const int argc, const char* argv[]) {
@@ -59,7 +58,7 @@ int main(const int argc, const char* argv[]) {
     }
     assert(clauses->size() == clauseAmt);
     srand(time(NULL));
-    Simanneal<vector<byte>, vector<Config*>> * annealer = new Simanneal<vector<byte>, vector<Config*>>(0.90, 1000, 100, 100, variables, clauses);
+    Simanneal<vector<byte>, vector<Config*>> * annealer = new Simanneal<vector<byte>, vector<Config*>>(0.99, 1000, 100, 100, variables, clauses);
 
     #ifdef DEBUG
     int count = 0;
@@ -81,6 +80,12 @@ int main(const int argc, const char* argv[]) {
         cout << i << " ";
     }cout << endl;
     cout << "K = " << ans.first << endl;
+    #else
+    auto ans = annealer->Anneal(&sorter, &alphatemp);
+    for(auto i : ans.first){
+      cout << i << " ";
+    }cout << endl;
+    cout << ans.second.first << endl;
     #endif
 
     return 0;
