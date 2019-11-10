@@ -16,7 +16,6 @@ private:
     double iteraT;
     int iterations;
     int updates;
-    int maxSuccess;
 
     int eval(){
         int val = 0;
@@ -26,9 +25,15 @@ private:
         return val;
     }
 
+    double normalizeDelta(double delta, double left, double right){
+        double normal = (delta - 0) * (right - left) / ( this->clauses->size() - 0 ) + left;
+        // cout << "normalDelta " << normal << endl;
+        return normal;
+    }
+
 public:
     explicit Simanneal(double firstT = 2, int iterations = 1000, int updates = 100);
-    Simanneal(double firstT, int iterations, int updates, int maxSuccess, T * dataset, G * clauses);
+    Simanneal(double firstT, int iterations, int updates, T * dataset, G * clauses);
 
     pair<int, T> Randomsearch(void (*f)(T*)){
         int updates = this->updates;
@@ -53,7 +58,7 @@ public:
         return {maxK, bestSet};
     }
 
-    pair<vector<int>, pair<int, T>> Anneal(void (*f)(T*, double temp), void (*g)(double*, int update)){
+    pair<vector<int>, pair<int, T>> Anneal(void (*f)(T*), void (*g)(double*, int update)){
         this->  iteraT      = this->firstT;
         int     iterations  = this->iterations;
         int     updates     = this->updates;
@@ -61,55 +66,69 @@ public:
 
         T       bestSet     = *this->dataset;
         int     bestEval    = this->eval();
-        double  deltaBest   = (double)bestEval / this->clauses->size();
+        double  deltaBest   = (double)bestEval; /// this->clauses->size();
 
         T       iterSet     = *this->dataset;
         int     iterEval    = bestEval;
-        double  deltaIter    = deltaBest;
+        double  deltaIter   = deltaBest;
 
         vector<int> history;
         history.push_back(bestEval);
 
         int j=1;
-        int success;
         do {
             int i=1;
-            success = 0;
             updates = this->updates;
             do{
                 iterSet = *this->dataset;
-                f(this->dataset, this->iteraT);
+                f(this->dataset);
                 int testEval = this->eval();
-                double deltaTest = (double)testEval / this->clauses->size();
+                double deltaTest = (double)testEval; /// this->clauses->size();
                 double delta = deltaIter - deltaTest;
 
                 if(delta <= 0) {
-                    success++;
                     deltaIter = deltaTest;
                     history.push_back(testEval);
+                    #ifdef DEBUG
+                    // cout << "small delta pick\n";
+                    #endif
                     if(testEval > bestEval){
+                        #ifdef DEBUG
+                        cout << "newBest " << testEval << " > " << bestEval << "\n";
+                        getchar();
+                        #endif
                         bestSet = *this->dataset;
                         deltaBest = deltaTest;
                         bestEval = testEval;
                     }
                 } else {
-                  double a = (double)rand() / RAND_MAX;
-                  double b = exp(-delta / this->iteraT);
-                  if(a >= b){
-                      *this->dataset = iterSet;
-                  } else {
-                    deltaIter = deltaTest;
-                  }
+                    double a = (double)rand() / RAND_MAX;
+                    double b = exp(this->normalizeDelta(delta, -200, 0) / this->iteraT);
+                    #ifdef DEBUG
+                    printf("a > %.3lf\nb > %.3lf\n ", a, b);
+                    #endif
+                    if(a >= b){
+                        #ifdef DEBUG
+                        cout << "fallBack\n";
+                        #endif
+                        *this->dataset = iterSet;
+                    } else {
+                        #ifdef DEBUG
+                        cout << "pick\n";
+                        #endif
+                        deltaIter = deltaTest;
+                        history.push_back(testEval);
+                    }
                 }
                 i++;
-            } while(success < this->maxSuccess && i <= updates );
+            } while(i <= updates );
 
             g(&this->iteraT, j);
             j++;
             #ifdef DEBUG
-            cout << "\ntemperature> " << this->iteraT << endl;
+             cout << "\ntemperature> " << this->iteraT << endl;
             #endif
-        }while(/*success != 0 && j <= iterations*/this->iteraT > 0.01);
+        }while(/*success != 0 && j <= iterations*/this->iteraT > 0.001);
         int trues = 0;
         *this->dataset = bestSet;
         for(auto c : *this->clauses){
@@ -134,11 +153,10 @@ Simanneal<T,G>::Simanneal(double firstT, int iterations, int updates){
 }
 
 template <class T, class G>
-Simanneal<T,G>::Simanneal(double firstT, int iterations, int updates, int maxSuccess, T * dataset, G * clauses){
+Simanneal<T,G>::Simanneal(double firstT, int iterations, int updates, T * dataset, G * clauses){
     this->firstT = firstT;
     this->iterations = iterations;
     this->updates = updates;
-    this->maxSuccess = maxSuccess;
     this->dataset = dataset;
     this->clauses = clauses;
     #ifdef DEBUG

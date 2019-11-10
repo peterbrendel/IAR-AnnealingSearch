@@ -16,25 +16,28 @@
 #include <cstdio>
 #include <cmath>
 
-const double T0 = 1000, TN = 0.01;
+const double T0 = 100, TN = 0.01;
 const int N = 1000;
-const int updt = 100;
-const int maxSucc = 1000;
+const int updt = 1000;
 const double A = (T0 - TN) * (N + 1) / N;
 const double B = T0 - A;
 
-void sorter(vector<byte> * arr, double temp){
+void sorter(vector<byte> * arr){
     int arrsz = arr->size();
     for(int i=0; i < arrsz; i++){
-        (*arr)[i] ^= ((double)rand() / RAND_MAX < temp);
+        (*arr)[i] ^= ((double)rand() / RAND_MAX <= 0.5);
     }
 }
 
 void alphatemp(double * temp, int iter){
-    *temp = (A/(iter+1)) + B;
+    *temp = (A/(iter)) + B;
     // double in = iter / 1000;
     // *temp = 0.99 * pow((0.5 / 0.99), in);
     // *temp = 1.0 / (1 + 1.78 * log(1+iter));
+}
+
+void slowerAlphatemp(double * temp, int iter){
+    *temp = T0 * powf((TN / T0), (double)iter/(double)N);
 }
 
 int main(const int argc, const char* argv[]) {
@@ -68,7 +71,7 @@ int main(const int argc, const char* argv[]) {
     }
     assert(clauses->size() == clauseAmt);
     srand(time(NULL));
-    Simanneal<vector<byte>, vector<Config*>> * annealer = new Simanneal<vector<byte>, vector<Config*>>(T0, N, updt, maxSucc, variables, clauses);
+    Simanneal<vector<byte>, vector<Config*>> * annealer = new Simanneal<vector<byte>, vector<Config*>>(T0, N, updt, variables, clauses);
 
     #ifdef DEBUG
     int count = 0;
@@ -84,14 +87,14 @@ int main(const int argc, const char* argv[]) {
     // auto ans = annealer->Randomsearch(&sorter);
     // cout << "RandomSearch answer:\n";
 
-    auto ans = annealer->Anneal(&sorter, &alphatemp);
+    auto ans = annealer->Anneal(&sorter, &slowerAlphatemp);
     cout << "Simulated Annealing answer:\n";
     for(int i : ans.second.second){
         cout << i << " ";
     }cout << endl;
     cout << "K = " << ans.second.first << endl;
     #else
-    auto ans = annealer->Anneal(&sorter, &alphatemp);
+    auto ans = annealer->Anneal(&sorter, &slowerAlphatemp);
     for(auto i : ans.first){
       cout << i << " ";
     }cout << endl;
