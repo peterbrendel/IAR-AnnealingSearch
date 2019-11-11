@@ -15,4 +15,4 @@ with open('../outputs/' + fn, 'r') as f:
 fig, ax = plt.subplots()
 ax.plot(data, linewidth=0.1)
 
-plt.savefig('result.png')
+plt.savefig('result_' + fn + '.png')

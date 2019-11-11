@@ -16,10 +16,10 @@
 #include <cstdio>
 #include <cmath>
 
-const double T0 = 100, TN = 0.01;
-const int N = 1000;
-const int updt = 1000;
-const double A = (T0 - TN) * (N + 1) / N;
+const double T0 = 1000, TN = 0.0001;
+const int updt = 10000;
+const int N = 35;
+const double A = (T0 - TN) * (N + 1) / (N-1);
 const double B = T0 - A;
 
 void sorter(vector<byte> * arr){
@@ -71,7 +71,7 @@ int main(const int argc, const char* argv[]) {
     }
     assert(clauses->size() == clauseAmt);
     srand(time(NULL));
-    Simanneal<vector<byte>, vector<Config*>> * annealer = new Simanneal<vector<byte>, vector<Config*>>(T0, N, updt, variables, clauses);
+    Simanneal<vector<byte>, vector<Config*>> * annealer = new Simanneal<vector<byte>, vector<Config*>>(T0, updt, variables, clauses);
 
     #ifdef DEBUG
     int count = 0;
@@ -87,14 +87,16 @@ int main(const int argc, const char* argv[]) {
     // auto ans = annealer->Randomsearch(&sorter);
     // cout << "RandomSearch answer:\n";
 
-    auto ans = annealer->Anneal(&sorter, &slowerAlphatemp);
+    auto ans = annealer->Anneal(&sorter, &alphatemp);
     cout << "Simulated Annealing answer:\n";
     for(int i : ans.second.second){
         cout << i << " ";
     }cout << endl;
     cout << "K = " << ans.second.first << endl;
+
     #else
-    auto ans = annealer->Anneal(&sorter, &slowerAlphatemp);
+
+    auto ans = annealer->Anneal(&sorter, &alphatemp);
     for(auto i : ans.first){
       cout << i << " ";
     }cout << endl;
