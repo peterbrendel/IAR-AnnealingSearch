@@ -17,7 +17,7 @@
 #include <cmath>
 
 const double T0 = 1000, TN = 0.0001;
-const int updt = 10000;
+const int updt = 100000;
 const int N = 35;
 const double A = (T0 - TN) * (N + 1) / (N-1);
 const double B = T0 - A;
@@ -25,7 +25,7 @@ const double B = T0 - A;
 void sorter(vector<byte> * arr){
     int arrsz = arr->size();
     for(int i=0; i < arrsz; i++){
-        (*arr)[i] ^= ((double)rand() / RAND_MAX <= 0.5);
+        (*arr)[i] ^= ((double)rand() / RAND_MAX <= 0.05);
     }
 }
 
@@ -95,12 +95,14 @@ int main(const int argc, const char* argv[]) {
     cout << "K = " << ans.second.first << endl;
 
     #else
-
-    auto ans = annealer->Anneal(&sorter, &alphatemp);
-    for(auto i : ans.first){
-      cout << i << " ";
-    }cout << endl;
-    cout << ans.second.first << endl;
+    for(int i=0; i<10; i++){
+        auto ans = annealer->Anneal(&sorter, &alphatemp);
+        // auto ans = annealer->Randomsearch(&sorter);
+        for(auto i : ans.first){
+          cout << i << " ";
+        }cout << endl;
+        cout << ans.second.first << endl;
+    }
     #endif
 
     return 0;

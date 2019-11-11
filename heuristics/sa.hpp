@@ -101,7 +101,7 @@ public:
                     double a = (double)rand() / RAND_MAX;
                     // cout << this->iteraT << endl;
                     // cout << -delta / this->iteraT * 10 << endl;
-                    double b = exp(/*(double)-delta*/this->normalizeDelta(delta, -200, 0) / (double)this->iteraT);
+                    double b = exp(/*this->normalizeDelta(delta, -200, 0)*/(-delta * this->clauses->size() / 5.0) / (double)this->iteraT);
                     // cout << b << endl;
                     #ifdef DEBUG
                     printf("a > %.3lf\nb > %.3lf\n ", a, b);
