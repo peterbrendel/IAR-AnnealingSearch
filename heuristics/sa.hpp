@@ -33,27 +33,26 @@ public:
     explicit Simanneal(double firstT = 2, int updates = 1000);
     Simanneal(double firstT, int updates, T * dataset, G * clauses);
 
-    pair<int, T> Randomsearch(void (*f)(T*)){
+    pair<vector<int>, pair<int, T>> Randomsearch(void (*f)(T*)){
         int updates = this->updates;
         int maxK = 0;
         T bestSet;
+        vector<int> history;
 
         while(updates--){
-            int iterations = this->updates;
-            while(iterations--){
-                int k = 0;
-                f(this->dataset);
-                for(auto c : *this->clauses){
-                    k += c->evaluate();
-                }
-                // cout << "Update " << this->updates - updates << " Iteration " << this->iterations - iterations << ": " << k << endl;
-                if(k > maxK){
-                    maxK = k;
-                    bestSet = *this->dataset;
-                }
+            int k = 0;
+            f(this->dataset);
+            for(auto c : *this->clauses){
+                k += c->evaluate();
+            }
+            history.push_back(k);
+            // cout << "Update " << this->updates - updates << " Iteration " << this->iterations - iterations << ": " << k << endl;
+            if(k > maxK){
+                maxK = k;
+                bestSet = *this->dataset;
             }
         }
-        return {maxK, bestSet};
+        return {history,{maxK, bestSet}};
     }
 
     pair<vector<int>, pair<int, T>> Anneal(void (*f)(T*), void (*g)(double*, int update)){

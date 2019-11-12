@@ -25,7 +25,7 @@ const double B = T0 - A;
 void sorter(vector<byte> * arr){
     int arrsz = arr->size();
     for(int i=0; i < arrsz; i++){
-        (*arr)[i] ^= ((double)rand() / RAND_MAX <= 0.05);
+        (*arr)[i] ^= ((double)rand() / RAND_MAX <= 0.5);
     }
 }
 
@@ -96,13 +96,13 @@ int main(const int argc, const char* argv[]) {
 
     #else
     for(int i=0; i<10; i++){
-        auto ans = annealer->Anneal(&sorter, &alphatemp);
-        // auto ans = annealer->Randomsearch(&sorter);
+        // auto ans = annealer->Anneal(&sorter, &alphatemp);
+        auto ans = annealer->Randomsearch(&sorter);
         for(auto i : ans.first){
           cout << i << " ";
         }cout << endl;
         cout << ans.second.first << endl;
-        cout << "#";
+        cout << "#\n";
     }
     #endif
 
